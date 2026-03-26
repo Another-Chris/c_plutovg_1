@@ -12,12 +12,14 @@ typedef struct {
   float center_x;
   float center_y;
   float radius;
-  float v;
+  float vy;
+  float vx;
 } Circle;
 
 
 #define GRAVITY 980.0f
 #define RESTITUTION 0.8f
+#define FRICTION 128.0f
 
 
 int render_and_clear_sdl_surface(
