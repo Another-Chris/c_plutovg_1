@@ -2,8 +2,20 @@
 #include "main.h"
 
 
+int render_text(
+    char* text, TTF_Font* font, SDL_Renderer* renderer, float x, float y) 
+{
+  SDL_Color color = {255,255,255,255};
+  SDL_Surface *text_surface = TTF_RenderText_Blended(font, text, 0, color);
+  return render_and_clear_sdl_surface(renderer, text_surface, x, y);
+}
 
-int render_and_clear_sdl_surface(SDL_Renderer* renderer, SDL_Surface* surface) {
+
+
+
+int render_and_clear_sdl_surface(
+    SDL_Renderer* renderer, SDL_Surface* surface, float x, float y)
+{
   SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
   if (!texture) {
     return -1;
@@ -14,8 +26,8 @@ int render_and_clear_sdl_surface(SDL_Renderer* renderer, SDL_Surface* surface) {
 
   // screen space
   SDL_FRect dst_rect = {
-    .x = 0.0f,
-    .y = 0.0f,
+    .x = x,
+    .y = y,
     .w = (float) surface->w,
     .h = (float) surface->h
   };
@@ -46,7 +58,7 @@ int render_and_clear_pluto_surface(
      return -1;
    }
 
-   int success = render_and_clear_sdl_surface(renderer, surface);
+   int success = render_and_clear_sdl_surface(renderer, surface, 0.0f, 0.0f);
    plutovg_surface_destroy(pluto_surface);                                 
 
    return success;
@@ -85,6 +97,14 @@ int main(void) {
   SDL_Window* window = SDL_CreateWindow("pluto", win_data.width, win_data.height, 0);
   SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL);
 
+  TTF_Init();
+  TTF_Font *font = TTF_OpenFont("font.ttf", 16.0f);
+  if (!font) {
+    fprintf(stderr, "Can't open font!\n");
+    return 1;
+  }
+
+
   Circle circle;
   circle.center_x = 10.0f;
   circle.center_y = 10.0f;
@@ -94,18 +114,15 @@ int main(void) {
 
   Uint64 prev = SDL_GetTicks();
   float dt = 0;
+  float fps_acc = 0;
+  char* fps_str = NULL;
 
   while(running == 1) {
 
     Uint64 now = SDL_GetTicks();
     dt = (now - prev) / 1000.0f;
     prev = now;
-
-    float fps = 1 / (dt);
-    printf("%f\n", fps);
-
-
-
+    fps_acc += dt;
 
 
     SDL_Event evt;
@@ -118,6 +135,21 @@ int main(void) {
     circle.center_y += 0.1;
     SDL_RenderClear(renderer);
     render_and_clear_pluto_surface(renderer, pluto_render(win_data, circle));
+
+    if (fps_acc > 0.5) {
+      float fps = 1 / (dt);
+      if (fps_str) {
+        free(fps_str);
+      }
+      asprintf(&fps_str, "FPS: %.4f", fps);
+      fps_acc = 0;
+    }
+
+    // always render, except for the first 0.5 seconds
+    if (fps_str != NULL) {
+      render_text(fps_str, font, renderer, 365.0, 5.0);
+    }
+
 
     SDL_RenderPresent(renderer);
   }
