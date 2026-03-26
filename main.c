@@ -91,7 +91,23 @@ int main(void) {
   circle.radius = 10.0f;
 
   int running = 1;
+
+  Uint64 prev = SDL_GetTicks();
+  float dt = 0;
+
   while(running == 1) {
+
+    Uint64 now = SDL_GetTicks();
+    dt = (now - prev) / 1000.0f;
+    prev = now;
+
+    float fps = 1 / (dt);
+    printf("%f\n", fps);
+
+
+
+
+
     SDL_Event evt;
     while(SDL_PollEvent(&evt)) {
       if (evt.type == SDL_EVENT_QUIT) {

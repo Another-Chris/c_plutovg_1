@@ -1,0 +1,2 @@
+- show fps
+- show text using SDL-ttf
