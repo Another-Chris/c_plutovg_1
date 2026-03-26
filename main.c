@@ -87,6 +87,19 @@ plutovg_surface_t* pluto_render(WinData win_data, Circle circle) {
   return surface;
 }
 
+void update(Circle* circle, WinData win_data, float dt) {
+  circle->v += (GRAVITY * dt);
+  circle->center_y += (circle->v * dt);
+  if (circle->center_y + circle->radius >= win_data.height) {
+    circle->center_y = win_data.height - circle->radius;
+    circle->v = -circle->v * RESTITUTION;
+    if (SDL_fabsf(circle->v) < 10) {
+      circle->v = 0;
+      circle->center_y = win_data.height - circle->radius;
+    }
+  }
+}
+
 
 int main(void) {
   WinData win_data;
@@ -109,6 +122,7 @@ int main(void) {
   circle.center_x = 10.0f;
   circle.center_y = 10.0f;
   circle.radius = 10.0f;
+  circle.v = 0.0f;
 
   int running = 1;
 
@@ -117,15 +131,12 @@ int main(void) {
   float fps_acc = 0;
   char* fps_str = NULL;
 
-  int velocity = 0;
-
   while(running == 1) {
 
     Uint64 now = SDL_GetTicks();
     dt = (now - prev) / 1000.0f;
     prev = now;
     fps_acc += dt;
-
 
     SDL_Event evt;
     while(SDL_PollEvent(&evt)) {
@@ -134,16 +145,8 @@ int main(void) {
       }
     }
 
-    velocity += (GRAVITY * dt);
-    circle.center_y += (velocity * dt);
-    if (circle.center_y + circle.radius >= win_data.height) {
-      circle.center_y = win_data.height - circle.radius;
-      velocity = -velocity * RESTITUTION;
-      if (SDL_fabsf(velocity) < 10) {
-        velocity = 0;
-        circle.center_y = win_data.height - circle.radius;
-      }
-    }
+
+    update(&circle, win_data, dt);
 
     SDL_RenderClear(renderer);
     render_and_clear_pluto_surface(renderer, pluto_render(win_data, circle));
