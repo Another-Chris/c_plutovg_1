@@ -15,6 +15,10 @@ typedef struct {
 } Circle;
 
 
+#define GRAVITY 980.0f
+#define RESTITUTION 0.8f
+
+
 int render_and_clear_sdl_surface(
     SDL_Renderer* renderer, SDL_Surface* surface, float x, float y);
 int render_and_clear_pluto_surface(

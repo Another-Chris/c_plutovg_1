@@ -117,6 +117,8 @@ int main(void) {
   float fps_acc = 0;
   char* fps_str = NULL;
 
+  int velocity = 0;
+
   while(running == 1) {
 
     Uint64 now = SDL_GetTicks();
@@ -132,7 +134,17 @@ int main(void) {
       }
     }
 
-    circle.center_y += 0.1;
+    velocity += (GRAVITY * dt);
+    circle.center_y += (velocity * dt);
+    if (circle.center_y + circle.radius >= win_data.height) {
+      circle.center_y = win_data.height - circle.radius;
+      velocity = -velocity * RESTITUTION;
+      if (SDL_fabsf(velocity) < 10) {
+        velocity = 0;
+        circle.center_y = win_data.height - circle.radius;
+      }
+    }
+
     SDL_RenderClear(renderer);
     render_and_clear_pluto_surface(renderer, pluto_render(win_data, circle));
 
