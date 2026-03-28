@@ -3,6 +3,7 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdio.h>
 
 typedef struct {
   int width;
